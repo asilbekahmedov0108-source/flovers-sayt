@@ -1,0 +1,1457 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Floré — Цветы с душой</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Source+Sans+3:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        :root {
+            --bg: #0b1a10;
+            --bg-light: #132a1a;
+            --fg: #f5efe6;
+            --fg-muted: #b8c4b0;
+            --accent: #e8665a;
+            --accent-hover: #f07a6e;
+            --rose: #d4728c;
+            --gold: #d4a855;
+            --card: #162e1e;
+            --card-hover: #1c3a26;
+            --border: #2a4a32;
+            --radius: 16px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Source Sans 3', sans-serif;
+            background: var(--bg);
+            color: var(--fg);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        h1, h2, h3, h4 { font-family: 'Playfair Display', serif; }
+
+        /* === НАВИГАЦИЯ === */
+        nav {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 100;
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: background 0.4s, backdrop-filter 0.4s, box-shadow 0.4s;
+        }
+
+        nav.scrolled {
+            background: rgba(11, 26, 16, 0.85);
+            backdrop-filter: blur(20px);
+            box-shadow: 0 2px 30px rgba(0,0,0,0.3);
+        }
+
+        .logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            font-weight: 900;
+            color: var(--fg);
+            text-decoration: none;
+            letter-spacing: 1px;
+        }
+
+        .logo span { color: var(--accent); }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--fg-muted);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: color 0.3s;
+            position: relative;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -4px; left: 0;
+            width: 0; height: 2px;
+            background: var(--accent);
+            transition: width 0.3s;
+        }
+
+        .nav-links a:hover { color: var(--fg); }
+        .nav-links a:hover::after { width: 100%; }
+
+        .nav-cart {
+            position: relative;
+            color: var(--fg);
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+
+        .nav-cart:hover { transform: scale(1.15); }
+
+        .cart-count {
+            position: absolute;
+            top: -8px; right: -10px;
+            background: var(--accent);
+            color: #fff;
+            font-size: 0.65rem;
+            font-weight: 700;
+            width: 18px; height: 18px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.3s;
+        }
+
+        .cart-count.bump { animation: bump 0.3s ease; }
+
+        @keyframes bump {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.5); }
+        }
+
+        .burger {
+            display: none;
+            flex-direction: column;
+            gap: 5px;
+            cursor: pointer;
+            z-index: 110;
+        }
+
+        .burger span {
+            display: block;
+            width: 26px; height: 2px;
+            background: var(--fg);
+            transition: all 0.3s;
+        }
+
+        /* === HERO === */
+        .hero {
+            position: relative;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        #petals-canvas {
+            position: absolute;
+            inset: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .hero-bg {
+            position: absolute;
+            inset: 0;
+            z-index: 0;
+        }
+
+        .hero-bg::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(ellipse 60% 50% at 20% 50%, rgba(232, 102, 90, 0.15) 0%, transparent 70%),
+                radial-gradient(ellipse 50% 60% at 80% 30%, rgba(212, 114, 140, 0.1) 0%, transparent 60%),
+                radial-gradient(ellipse 40% 40% at 50% 80%, rgba(212, 168, 85, 0.08) 0%, transparent 50%);
+        }
+
+        .hero-bg::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, transparent 60%, var(--bg) 100%);
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            max-width: 800px;
+            padding: 0 2rem;
+        }
+
+        .hero-tag {
+            display: inline-block;
+            font-size: 0.8rem;
+            font-weight: 700;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            color: var(--accent);
+            margin-bottom: 1.5rem;
+            opacity: 0;
+            animation: fadeUp 1s 0.3s forwards;
+        }
+
+        .hero-title {
+            font-size: clamp(3rem, 8vw, 6rem);
+            font-weight: 900;
+            line-height: 1.05;
+            margin-bottom: 1.5rem;
+            opacity: 0;
+            animation: fadeUp 1s 0.5s forwards;
+        }
+
+        .hero-title .highlight {
+            background: linear-gradient(135deg, var(--accent), var(--rose));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-desc {
+            font-size: 1.2rem;
+            color: var(--fg-muted);
+            max-width: 550px;
+            margin: 0 auto 2.5rem;
+            font-weight: 300;
+            opacity: 0;
+            animation: fadeUp 1s 0.7s forwards;
+        }
+
+        .hero-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            opacity: 0;
+            animation: fadeUp 1s 0.9s forwards;
+        }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* === КНОПКИ === */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.9rem 2rem;
+            border-radius: 60px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            cursor: pointer;
+            border: none;
+            transition: all 0.3s;
+            text-decoration: none;
+            font-family: inherit;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: #fff;
+            box-shadow: 0 4px 25px rgba(232, 102, 90, 0.35);
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 35px rgba(232, 102, 90, 0.45);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--fg);
+            border: 2px solid var(--border);
+        }
+
+        .btn-outline:hover {
+            border-color: var(--fg-muted);
+            background: rgba(255,255,255,0.05);
+            transform: translateY(-2px);
+        }
+
+        /* === СЕКЦИИ === */
+        section {
+            padding: 6rem 2rem;
+        }
+
+        .section-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        .section-tag {
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: var(--accent);
+            margin-bottom: 1rem;
+        }
+
+        .section-title {
+            font-size: clamp(2rem, 5vw, 3.2rem);
+            font-weight: 900;
+            margin-bottom: 1rem;
+        }
+
+        .section-desc {
+            color: var(--fg-muted);
+            max-width: 500px;
+            margin: 0 auto;
+            font-weight: 300;
+        }
+
+        /* === КАТАЛОГ === */
+        .catalog-filters {
+            display: flex;
+            gap: 0.75rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 3rem;
+        }
+
+        .filter-btn {
+            padding: 0.55rem 1.4rem;
+            border-radius: 50px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            color: var(--fg-muted);
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: inherit;
+        }
+
+        .filter-btn:hover, .filter-btn.active {
+            background: var(--accent);
+            color: #fff;
+            border-color: var(--accent);
+        }
+
+        .catalog-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .flower-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+            transition: all 0.4s;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .flower-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+            border-color: var(--accent);
+        }
+
+        .flower-card img {
+            width: 100%;
+            height: 260px;
+            object-fit: cover;
+            transition: transform 0.6s;
+        }
+
+        .flower-card:hover img { transform: scale(1.08); }
+
+        .flower-img-wrap { overflow: hidden; position: relative; }
+
+        .flower-badge {
+            position: absolute;
+            top: 12px; left: 12px;
+            background: var(--accent);
+            color: #fff;
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 4px 12px;
+            border-radius: 50px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .flower-info {
+            padding: 1.2rem 1.4rem;
+        }
+
+        .flower-name {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 0.3rem;
+        }
+
+        .flower-desc {
+            color: var(--fg-muted);
+            font-size: 0.85rem;
+            margin-bottom: 1rem;
+            font-weight: 300;
+        }
+
+        .flower-bottom {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .flower-price {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--gold);
+        }
+
+        .flower-price span {
+            font-size: 0.8rem;
+            font-weight: 300;
+            color: var(--fg-muted);
+        }
+
+        .add-btn {
+            width: 42px; height: 42px;
+            border-radius: 50%;
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+
+        .add-btn:hover {
+            background: var(--accent-hover);
+            transform: rotate(90deg) scale(1.1);
+        }
+
+        /* === ПРЕИМУЩЕСТВА === */
+        .features-section {
+            background: var(--bg-light);
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+        }
+
+        .feature-card {
+            text-align: center;
+            padding: 2.5rem 1.5rem;
+            border-radius: var(--radius);
+            background: rgba(255,255,255,0.02);
+            border: 1px solid transparent;
+            transition: all 0.4s;
+        }
+
+        .feature-card:hover {
+            border-color: var(--border);
+            background: var(--card);
+            transform: translateY(-4px);
+        }
+
+        .feature-icon {
+            width: 70px; height: 70px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            font-size: 1.6rem;
+            transition: all 0.4s;
+        }
+
+        .feature-card:nth-child(1) .feature-icon { background: rgba(232,102,90,0.15); color: var(--accent); }
+        .feature-card:nth-child(2) .feature-icon { background: rgba(212,168,85,0.15); color: var(--gold); }
+        .feature-card:nth-child(3) .feature-icon { background: rgba(212,114,140,0.15); color: var(--rose); }
+        .feature-card:nth-child(4) .feature-icon { background: rgba(100,180,120,0.15); color: #64b478; }
+
+        .feature-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 0.7rem;
+        }
+
+        .feature-text {
+            color: var(--fg-muted);
+            font-size: 0.9rem;
+            font-weight: 300;
+        }
+
+        /* === ГАЛЕРЕЯ === */
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-template-rows: 300px 300px;
+            gap: 1rem;
+        }
+
+        .gallery-item {
+            border-radius: var(--radius);
+            overflow: hidden;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .gallery-item:nth-child(1) { grid-column: 1 / 3; grid-row: 1 / 3; }
+        .gallery-item:nth-child(4) { grid-column: 4 / 5; grid-row: 1 / 3; }
+
+        .gallery-item img {
+            width: 100%; height: 100%;
+            object-fit: cover;
+            transition: transform 0.6s;
+        }
+
+        .gallery-item:hover img { transform: scale(1.1); }
+
+        .gallery-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, transparent 50%, rgba(11,26,16,0.8) 100%);
+            display: flex;
+            align-items: flex-end;
+            padding: 1.5rem;
+            opacity: 0;
+            transition: opacity 0.4s;
+        }
+
+        .gallery-item:hover .gallery-overlay { opacity: 1; }
+
+        .gallery-overlay span {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+
+        /* === ОТЗЫВЫ === */
+        .reviews-wrapper {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .reviews-track {
+            display: flex;
+            gap: 1.5rem;
+            transition: transform 0.5s ease;
+        }
+
+        .review-card {
+            min-width: 360px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 2rem;
+            flex-shrink: 0;
+            transition: all 0.3s;
+        }
+
+        .review-card:hover {
+            border-color: var(--accent);
+            transform: translateY(-4px);
+        }
+
+        .review-stars {
+            color: var(--gold);
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+        }
+
+        .review-text {
+            color: var(--fg-muted);
+            font-size: 0.95rem;
+            font-style: italic;
+            margin-bottom: 1.5rem;
+            line-height: 1.7;
+        }
+
+        .review-author {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .review-avatar {
+            width: 48px; height: 48px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--border);
+        }
+
+        .review-name { font-weight: 700; font-size: 0.95rem; }
+        .review-date { color: var(--fg-muted); font-size: 0.8rem; }
+
+        .reviews-nav {
+            display: flex;
+            gap: 0.75rem;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+
+        .reviews-nav button {
+            width: 48px; height: 48px;
+            border-radius: 50%;
+            background: var(--card);
+            border: 1px solid var(--border);
+            color: var(--fg);
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .reviews-nav button:hover {
+            background: var(--accent);
+            border-color: var(--accent);
+        }
+
+        /* === CTA / ПОДПИСКА === */
+        .cta-section {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta-inner {
+            background: linear-gradient(135deg, var(--card) 0%, rgba(232,102,90,0.12) 100%);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 4rem 3rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta-inner::before {
+            content: '';
+            position: absolute;
+            top: -50%; right: -20%;
+            width: 400px; height: 400px;
+            background: radial-gradient(circle, rgba(232,102,90,0.15), transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        .cta-title {
+            font-size: clamp(1.8rem, 4vw, 2.8rem);
+            font-weight: 900;
+            margin-bottom: 1rem;
+            position: relative;
+        }
+
+        .cta-desc {
+            color: var(--fg-muted);
+            max-width: 450px;
+            margin: 0 auto 2rem;
+            font-weight: 300;
+            position: relative;
+        }
+
+        .cta-form {
+            display: flex;
+            gap: 0.75rem;
+            max-width: 480px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .cta-form input {
+            flex: 1;
+            padding: 0.9rem 1.4rem;
+            border-radius: 60px;
+            border: 1px solid var(--border);
+            background: var(--bg);
+            color: var(--fg);
+            font-size: 0.95rem;
+            font-family: inherit;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .cta-form input::placeholder { color: var(--fg-muted); }
+        .cta-form input:focus { border-color: var(--accent); }
+
+        /* === FOOTER === */
+        footer {
+            background: var(--bg-light);
+            padding: 4rem 2rem 2rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .footer-grid {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 3rem;
+            margin-bottom: 3rem;
+        }
+
+        .footer-brand .logo { font-size: 1.5rem; }
+
+        .footer-brand p {
+            color: var(--fg-muted);
+            font-size: 0.9rem;
+            margin-top: 1rem;
+            font-weight: 300;
+            line-height: 1.7;
+        }
+
+        .footer-col h4 {
+            font-size: 0.85rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 1.2rem;
+            color: var(--fg);
+        }
+
+        .footer-col a {
+            display: block;
+            color: var(--fg-muted);
+            text-decoration: none;
+            font-size: 0.9rem;
+            margin-bottom: 0.7rem;
+            transition: color 0.3s;
+        }
+
+        .footer-col a:hover { color: var(--accent); }
+
+        .footer-social {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 1.5rem;
+        }
+
+        .footer-social a {
+            width: 40px; height: 40px;
+            border-radius: 50%;
+            background: var(--card);
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--fg-muted);
+            font-size: 1rem;
+            transition: all 0.3s;
+            margin-bottom: 0;
+        }
+
+        .footer-social a:hover {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: #fff;
+        }
+
+        .footer-bottom {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            color: var(--fg-muted);
+            font-size: 0.8rem;
+        }
+
+        /* === TOAST === */
+        .toast-container {
+            position: fixed;
+            bottom: 2rem; right: 2rem;
+            z-index: 200;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .toast {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-left: 4px solid var(--accent);
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            animation: slideIn 0.4s ease, fadeOut 0.4s 2.5s forwards;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+        }
+
+        .toast i { color: var(--accent); font-size: 1.1rem; }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; transform: translateX(50px); }
+        }
+
+        /* === МОДАЛКА === */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(8px);
+            z-index: 150;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s;
+        }
+
+        .modal-overlay.active { opacity: 1; pointer-events: all; }
+
+        .modal {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 2.5rem;
+            max-width: 450px;
+            width: 90%;
+            transform: translateY(30px) scale(0.95);
+            transition: transform 0.4s;
+        }
+
+        .modal-overlay.active .modal { transform: translateY(0) scale(1); }
+
+        .modal h3 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .modal p {
+            color: var(--fg-muted);
+            font-size: 0.9rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 1rem; right: 1rem;
+            background: none;
+            border: none;
+            color: var(--fg-muted);
+            font-size: 1.3rem;
+            cursor: pointer;
+        }
+
+        /* === СКРОЛЛ-АНИМАЦИЯ === */
+        .reveal {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: opacity 0.8s, transform 0.8s;
+        }
+
+        .reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* === ПЛАВАЮЩИЕ ДЕКОРЫ === */
+        .float-decor {
+            position: absolute;
+            border-radius: 50%;
+            pointer-events: none;
+            filter: blur(80px);
+            opacity: 0.5;
+        }
+
+        /* === АДАПТИВ === */
+        @media (max-width: 900px) {
+            .gallery-grid {
+                grid-template-columns: 1fr 1fr;
+                grid-template-rows: 250px 250px 250px;
+            }
+            .gallery-item:nth-child(1) { grid-column: 1 / 3; grid-row: auto; }
+            .gallery-item:nth-child(4) { grid-column: auto; grid-row: auto; }
+
+            .footer-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 2rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .nav-links { display: none; }
+            .burger { display: flex; }
+
+            .nav-links.open {
+                display: flex;
+                flex-direction: column;
+                position: fixed;
+                inset: 0;
+                background: rgba(11,26,16,0.97);
+                backdrop-filter: blur(20px);
+                justify-content: center;
+                align-items: center;
+                gap: 2rem;
+                z-index: 105;
+            }
+
+            .nav-links.open a { font-size: 1.5rem; }
+
+            .review-card { min-width: 300px; }
+
+            .cta-form { flex-direction: column; }
+
+            .footer-grid { grid-template-columns: 1fr; }
+            .footer-bottom { flex-direction: column; gap: 0.5rem; text-align: center; }
+        }
+
+        @media (max-width: 480px) {
+            .catalog-grid { grid-template-columns: 1fr; }
+            .gallery-grid { grid-template-columns: 1fr; grid-template-rows: auto; }
+            .gallery-item:nth-child(1) { grid-column: auto; }
+            .gallery-item img { height: 220px; }
+        }
+
+        /* Уменьшение анимаций для тех, кто просит */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+
+        /* Скроллбар */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg); }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+    </style>
+</head>
+<body>
+
+    <!-- Навигация -->
+    <nav id="main-nav">
+        <a href="#" class="logo">Flor<span>é</span></a>
+        <ul class="nav-links" id="nav-links">
+            <li><a href="#catalog">Каталог</a></li>
+            <li><a href="#features">О нас</a></li>
+            <li><a href="#gallery">Галерея</a></li>
+            <li><a href="#reviews">Отзывы</a></li>
+            <li><a href="#contact">Контакты</a></li>
+        </ul>
+        <div style="display:flex;align-items:center;gap:1.2rem;">
+            <div class="nav-cart" id="cart-icon" aria-label="Корзина">
+                <i class="fas fa-shopping-bag"></i>
+                <span class="cart-count" id="cart-count">0</span>
+            </div>
+            <div class="burger" id="burger" aria-label="Меню">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Герой -->
+    <section class="hero" id="hero">
+        <div class="hero-bg"></div>
+        <canvas id="petals-canvas"></canvas>
+        <div class="hero-content">
+            <div class="hero-tag">Студия авторской флористики</div>
+            <h1 class="hero-title">Цветы, что<br><span class="highlight">говорят за вас</span></h1>
+            <p class="hero-desc">Создаём букеты, которые передают чувства точнее любых слов. Свежие цветы, ручная работа, доставка день в день.</p>
+            <div class="hero-actions">
+                <a href="#catalog" class="btn btn-primary"><i class="fas fa-seedling"></i> Смотреть букеты</a>
+                <a href="#contact" class="btn btn-outline"><i class="fas fa-phone"></i> Заказать звонок</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Каталог -->
+    <section id="catalog">
+        <div class="section-container">
+            <div class="section-header reveal">
+                <div class="section-tag">Наши букеты</div>
+                <h2 class="section-title">Выберите свой букет</h2>
+                <p class="section-desc">Каждый букет собран вручную с любовью и вниманием к деталям</p>
+            </div>
+            <div class="catalog-filters reveal">
+                <button class="filter-btn active" data-filter="all">Все</button>
+                <button class="filter-btn" data-filter="rose">Розы</button>
+                <button class="filter-btn" data-filter="peony">Пионы</button>
+                <button class="filter-btn" data-filter="mixed">Микс</button>
+                <button class="filter-btn" data-filter="wedding">Свадебные</button>
+            </div>
+            <div class="catalog-grid" id="catalog-grid">
+                <!-- Карточки генерируются JS -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Преимущества -->
+    <section class="features-section" id="features">
+        <div class="section-container">
+            <div class="section-header reveal">
+                <div class="section-tag">Почему мы</div>
+                <h2 class="section-title">Больше, чем просто цветы</h2>
+                <p class="section-desc">Мы заботимся о каждом этапе — от цветочной поляны до ваших рук</p>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card reveal">
+                    <div class="feature-icon"><i class="fas fa-leaf"></i></div>
+                    <h3 class="feature-title">Свежесть каждый день</h3>
+                    <p class="feature-text">Цветы поступают напрямую из оранжерей каждое утро. Никаких складских запасов — только свежесть.</p>
+                </div>
+                <div class="feature-card reveal">
+                    <div class="feature-icon"><i class="fas fa-hand-sparkles"></i></div>
+                    <h3 class="feature-title">Ручная работа</h3>
+                    <p class="feature-text">Каждый букет собирает профессиональный флорист с многолетним опытом и чувством гармонии.</p>
+                </div>
+                <div class="feature-card reveal">
+                    <div class="feature-icon"><i class="fas fa-truck-fast"></i></div>
+                    <h3 class="feature-title">Доставка 90 минут</h3>
+                    <p class="feature-text">Бережная доставка по городу в термопакетах. Цветы доедут в идеальном состоянии.</p>
+                </div>
+                <div class="feature-card reveal">
+                    <div class="feature-icon"><i class="fas fa-heart"></i></div>
+                    <h3 class="feature-title">Гарантия стойкости</h3>
+                    <p class="feature-text">Если букет не простоит 5 дней — заменим бесплатно. Мы уверены в качестве.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Галерея -->
+    <section id="gallery">
+        <div class="section-container">
+            <div class="section-header reveal">
+                <div class="section-tag">Вдохновение</div>
+                <h2 class="section-title">Наши работы</h2>
+                <p class="section-desc">Немного из того, что мы создаём каждый день</p>
+            </div>
+            <div class="gallery-grid reveal">
+                <div class="gallery-item">
+                    <img src="https://picsum.photos/seed/flor1/800/800.jpg" alt="Букет невесты">
+                    <div class="gallery-overlay"><span>Букет невесты</span></div>
+                </div>
+                <div class="gallery-item">
+                    <img src="https://picsum.photos/seed/flor2/400/400.jpg" alt="Весенний микс">
+                    <div class="gallery-overlay"><span>Весенний микс</span></div>
+                </div>
+                <div class="gallery-item">
+                    <img src="https://picsum.photos/seed/flor3/400/400.jpg" alt="Корзина с розами">
+                    <div class="gallery-overlay"><span>Корзина с розами</span></div>
+                </div>
+                <div class="gallery-item">
+                    <img src="https://picsum.photos/seed/flor4/400/800.jpg" alt="Пионовое чудо">
+                    <div class="gallery-overlay"><span>Пионовое чудо</span></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Отзывы -->
+    <section id="reviews">
+        <div class="section-container">
+            <div class="section-header reveal">
+                <div class="section-tag">Отзывы</div>
+                <h2 class="section-title">Что говорят клиенты</h2>
+                <p class="section-desc">Реальные истории и тёплые слова</p>
+            </div>
+            <div class="reviews-wrapper reveal">
+                <div class="reviews-track" id="reviews-track">
+                    <!-- Генерируются JS -->
+                </div>
+            </div>
+            <div class="reviews-nav">
+                <button id="rev-prev" aria-label="Предыдущий отзыв"><i class="fas fa-arrow-left"></i></button>
+                <button id="rev-next" aria-label="Следующий отзыв"><i class="fas fa-arrow-right"></i></button>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="cta-section" id="contact">
+        <div class="section-container">
+            <div class="cta-inner reveal">
+                <h2 class="cta-title">Получите скидку 10%</h2>
+                <p class="cta-desc">Подпишитесь на рассылку и получите промокод на первый заказ. Никакого спама — только красота.</p>
+                <form class="cta-form" id="subscribe-form">
+                    <input type="email" placeholder="Ваш email" required aria-label="Email для подписки">
+                    <button type="submit" class="btn btn-primary">Подписаться</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Футер -->
+    <footer>
+        <div class="footer-grid">
+            <div class="footer-brand">
+                <a href="#" class="logo">Flor<span>é</span></a>
+                <p>Студия авторской флористики в Москве. Создаём букеты, которые рассказывают истории и дарят эмоции с 2018 года.</p>
+                <div class="footer-social">
+                    <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                    <a href="#" aria-label="Telegram"><i class="fab fa-telegram-plane"></i></a>
+                    <a href="#" aria-label="VK"><i class="fab fa-vk"></i></a>
+                    <a href="#" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+                </div>
+            </div>
+            <div class="footer-col">
+                <h4>Каталог</h4>
+                <a href="#">Розы</a>
+                <a href="#">Пионы</a>
+                <a href="#">Свадебные</a>
+                <a href="#">Композиции</a>
+                <a href="#">Корзины</a>
+            </div>
+            <div class="footer-col">
+                <h4>Информация</h4>
+                <a href="#">Доставка</a>
+                <a href="#">Оплата</a>
+                <a href="#">О компании</a>
+                <a href="#">Возврат</a>
+                <a href="#">FAQ</a>
+            </div>
+            <div class="footer-col">
+                <h4>Контакты</h4>
+                <a href="tel:+74951234567"><i class="fas fa-phone" style="margin-right:6px"></i>+7 (495) 123-45-67</a>
+                <a href="mailto:hello@flore.ru"><i class="fas fa-envelope" style="margin-right:6px"></i>hello@flore.ru</a>
+                <a href="#"><i class="fas fa-map-marker-alt" style="margin-right:6px"></i>Москва, ул. Цветочная, 12</a>
+                <a href="#"><i class="fas fa-clock" style="margin-right:6px"></i>Ежедневно 8:00–22:00</a>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <span>2024 Floré. Все права защищены.</span>
+            <span>Сделано с <i class="fas fa-heart" style="color:var(--accent);"></i> и цветами</span>
+        </div>
+    </footer>
+
+    <!-- Тосты -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <!-- Модалка заказа -->
+    <div class="modal-overlay" id="modal-overlay">
+        <div class="modal" style="position:relative;">
+            <button class="modal-close" id="modal-close" aria-label="Закрыть"><i class="fas fa-times"></i></button>
+            <h3 id="modal-title">Заказать букет</h3>
+            <p id="modal-desc">Заполните форму и мы перезвоним для уточнения деталей</p>
+            <form id="order-form" style="display:flex;flex-direction:column;gap:0.75rem;">
+                <input type="text" placeholder="Ваше имя" required style="padding:0.8rem 1.2rem;border-radius:12px;border:1px solid var(--border);background:var(--bg);color:var(--fg);font-family:inherit;font-size:0.95rem;outline:none;" aria-label="Имя">
+                <input type="tel" placeholder="Телефон" required style="padding:0.8rem 1.2rem;border-radius:12px;border:1px solid var(--border);background:var(--bg);color:var(--fg);font-family:inherit;font-size:0.95rem;outline:none;" aria-label="Телефон">
+                <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;margin-top:0.5rem;">Отправить заявку</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+    // === ДАННЫЕ ===
+    const flowers = [
+        { id: 1, name: 'Красная классика', desc: '51 роза в авторской упаковке', price: 8900, category: 'rose', badge: 'Хит', img: 'https://picsum.photos/seed/rosa51/600/500.jpg' },
+        { id: 2, name: 'Пионовый рай', desc: 'Нежные пионы сорт Сара Бернар', price: 12500, category: 'peony', badge: 'Премиум', img: 'https://picsum.photos/seed/peony1/600/500.jpg' },
+        { id: 3, name: 'Весеннее утро', desc: 'Тюльпаны, ранункулюсы, эустома', price: 5400, category: 'mixed', badge: '', img: 'https://picsum.photos/seed/spring1/600/500.jpg' },
+        { id: 4, name: 'Для неё', desc: 'Кустовая роза, эвкалипт, лагурус', price: 4700, category: 'rose', badge: '', img: 'https://picsum.photos/seed/her1/600/500.jpg' },
+        { id: 5, name: 'Свадебный вальс', desc: 'Белые розы, эустома, астильба', price: 15200, category: 'wedding', badge: 'Свадебный', img: 'https://picsum.photos/seed/wed1/600/500.jpg' },
+        { id: 6, name: 'Янтарный закат', desc: 'Оранжевые розы, хризантемы', price: 6300, category: 'mixed', badge: '', img: 'https://picsum.photos/seed/amber1/600/500.jpg' },
+        { id: 7, name: 'Розовое облако', desc: '25 розовых роз в крафте', price: 5100, category: 'rose', badge: '', img: 'https://picsum.photos/seed/pinkr1/600/500.jpg' },
+        { id: 8, name: 'Богема', desc: 'Пионы, гортензия, зелень', price: 16800, category: 'peony', badge: 'Премиум', img: 'https://picsum.photos/seed/boh1/600/500.jpg' },
+        { id: 9, name: 'Элегантность', desc: 'Белые лилии, эустома, рускус', price: 7800, category: 'mixed', badge: '', img: 'https://picsum.photos/seed/eleg1/600/500.jpg' },
+        { id: 10, name: 'Нежность невесты', desc: 'Гортензия, ранункулюс, жасмин', price: 18500, category: 'wedding', badge: 'Свадебный', img: 'https://picsum.photos/seed/brid1/600/500.jpg' },
+        { id: 11, name: 'Огненная страсть', desc: '101 красная роза в шляпной коробке', price: 24500, category: 'rose', badge: 'Люкс', img: 'https://picsum.photos/seed/fire1/600/500.jpg' },
+        { id: 12, name: 'Лавандовый сон', desc: 'Лаванда, эхинацея, полевые цветы', price: 4200, category: 'mixed', badge: '', img: 'https://picsum.photos/seed/lav1/600/500.jpg' },
+    ];
+
+    const reviews = [
+        { name: 'Анна К.', date: '15 октября 2024', text: 'Заказывала букет на свадьбу подруги. Результат превзошёл все ожидания! Цветы были невероятно свежими, а композиция — просто произведение искусства.', stars: 5, avatar: 'https://picsum.photos/seed/av1/100/100.jpg' },
+        { name: 'Дмитрий В.', date: '2 ноября 2024', text: 'Доставили за 40 минут! Жена была в восторге от букета. Теперь только здесь буду заказывать. Отличный сервис и свежие цветы.', stars: 5, avatar: 'https://picsum.photos/seed/av2/100/100.jpg' },
+        { name: 'Мария С.', date: '20 октября 2024', text: 'Пионы стояли больше недели! Это какой-то рекорд. Флорист подобрал идеальное сочетание цветов, даже лучше, чем я описывала.', stars: 5, avatar: 'https://picsum.photos/seed/av3/100/100.jpg' },
+        { name: 'Алексей Р.', date: '8 ноября 2024', text: 'Заказывал корпоративные композиции на 8 марта. Всё было выполнено в срок, цветы потрясающие. Коллеги были в восторге!', stars: 4, avatar: 'https://picsum.photos/seed/av4/100/100.jpg' },
+        { name: 'Елена П.', date: '25 ноября 2024', text: 'Третий раз заказываю и каждый раз — восторг! Букет «Весеннее утро» стал моим фаворитом. Спасибо за красоту!', stars: 5, avatar: 'https://picsum.photos/seed/av5/100/100.jpg' },
+    ];
+
+    // === КОРЗИНА ===
+    let cartCount = 0;
+
+    function addToCart(flowerName) {
+        cartCount++;
+        const el = document.getElementById('cart-count');
+        el.textContent = cartCount;
+        el.classList.remove('bump');
+        void el.offsetWidth; // reflow для перезапуска анимации
+        el.classList.add('bump');
+        showToast(`${flowerName} добавлен в корзину`);
+    }
+
+    // === ТОСТЫ ===
+    function showToast(message) {
+        const container = document.getElementById('toast-container');
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+        toast.innerHTML = `<i class="fas fa-check-circle"></i><span>${message}</span>`;
+        container.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
+    }
+
+    // === РЕНДЕР КАТАЛОГА ===
+    let currentFilter = 'all';
+
+    function renderCatalog(filter = 'all') {
+        const grid = document.getElementById('catalog-grid');
+        const filtered = filter === 'all' ? flowers : flowers.filter(f => f.category === filter);
+        grid.innerHTML = '';
+
+        filtered.forEach((f, i) => {
+            const card = document.createElement('div');
+            card.className = 'flower-card reveal';
+            card.style.transitionDelay = `${i * 0.08}s`;
+            card.innerHTML = `
+                <div class="flower-img-wrap">
+                    <img src="${f.img}" alt="${f.name}" loading="lazy">
+                    ${f.badge ? `<div class="flower-badge">${f.badge}</div>` : ''}
+                </div>
+                <div class="flower-info">
+                    <h3 class="flower-name">${f.name}</h3>
+                    <p class="flower-desc">${f.desc}</p>
+                    <div class="flower-bottom">
+                        <div class="flower-price">${f.price.toLocaleString('ru-RU')} <span>руб.</span></div>
+                        <button class="add-btn" aria-label="Добавить ${f.name} в корзину" data-name="${f.name}">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+            grid.appendChild(card);
+        });
+
+        // Навешиваем обработчики на кнопки
+        grid.querySelectorAll('.add-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                addToCart(btn.dataset.name);
+            });
+        });
+
+        // Навешиваем клик по карточке для модалки
+        grid.querySelectorAll('.flower-card').forEach((card, i) => {
+            card.addEventListener('click', () => openModal(filtered[i]));
+        });
+
+        // Запускаем reveal для новых карточек
+        requestAnimationFrame(() => {
+            grid.querySelectorAll('.reveal').forEach(el => observeReveal(el));
+        });
+    }
+
+    // === ФИЛЬТРЫ ===
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentFilter = btn.dataset.filter;
+            renderCatalog(currentFilter);
+        });
+    });
+
+    // === МОДАЛКА ===
+    const modalOverlay = document.getElementById('modal-overlay');
+
+    function openModal(flower) {
+        document.getElementById('modal-title').textContent = flower.name;
+        document.getElementById('modal-desc').textContent = `${flower.desc} — ${flower.price.toLocaleString('ru-RU')} руб.`;
+        modalOverlay.classList.add('active');
+    }
+
+    document.getElementById('modal-close').addEventListener('click', () => {
+        modalOverlay.classList.remove('active');
+    });
+
+    modalOverlay.addEventListener('click', (e) => {
+        if (e.target === modalOverlay) modalOverlay.classList.remove('active');
+    });
+
+    document.getElementById('order-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        modalOverlay.classList.remove('active');
+        showToast('Заявка отправлена! Мы скоро перезвоним.');
+        e.target.reset();
+    });
+
+    // === ОТЗЫВЫ ===
+    function renderReviews() {
+        const track = document.getElementById('reviews-track');
+        track.innerHTML = '';
+        reviews.forEach(r => {
+            const card = document.createElement('div');
+            card.className = 'review-card';
+            card.innerHTML = `
+                <div class="review-stars">${'<i class="fas fa-star"></i>'.repeat(r.stars)}${'<i class="far fa-star"></i>'.repeat(5 - r.stars)}</div>
+                <p class="review-text">"${r.text}"</p>
+                <div class="review-author">
+                    <img class="review-avatar" src="${r.avatar}" alt="${r.name}" loading="lazy">
+                    <div>
+                        <div class="review-name">${r.name}</div>
+                        <div class="review-date">${r.date}</div>
+                    </div>
+                </div>
+            `;
+            track.appendChild(card);
+        });
+    }
+
+    let reviewPos = 0;
+    function slideReviews(dir) {
+        const track = document.getElementById('reviews-track');
+        const cardWidth = track.querySelector('.review-card').offsetWidth + 24; // + gap
+        const maxPos = Math.max(0, (reviews.length - 3) * cardWidth);
+        reviewPos = Math.max(0, Math.min(maxPos, reviewPos + dir * cardWidth));
+        track.style.transform = `translateX(-${reviewPos}px)`;
+    }
+
+    document.getElementById('rev-prev').addEventListener('click', () => slideReviews(-1));
+    document.getElementById('rev-next').addEventListener('click', () => slideReviews(1));
+
+    // === ПОДПИСКА ===
+    document.getElementById('subscribe-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const input = e.target.querySelector('input');
+        if (input.value) {
+            showToast('Промокод отправлен на ваш email!');
+            input.value = '';
+        }
+    });
+
+    // === НАВИГАЦИЯ ===
+    // Скролл-эффект
+    window.addEventListener('scroll', () => {
+        document.getElementById('main-nav').classList.toggle('scrolled', window.scrollY > 50);
+    });
+
+    // Бургер
+    const burger = document.getElementById('burger');
+    const navLinks = document.getElementById('nav-links');
+    burger.addEventListener('click', () => {
+        navLinks.classList.toggle('open');
+    });
+
+    // Закрытие мобильного меню по клику на ссылку
+    navLinks.querySelectorAll('a').forEach(a => {
+        a.addEventListener('click', () => navLinks.classList.remove('open'));
+    });
+
+    // === СКРОЛЛ-АНИМАЦИЯ ===
+    const revealObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+            }
+        });
+    }, { threshold: 0.1 });
+
+    function observeReveal(el) {
+        revealObserver.observe(el);
+    }
+
+    document.querySelectorAll('.reveal').forEach(el => observeReveal(el));
+
+    // === КАНВАС: ПАДАЮЩИЕ ЛЕПЕСТКИ ===
+    const canvas = document.getElementById('petals-canvas');
+    const ctx = canvas.getContext('2d');
+
+    function resizeCanvas() {
+        canvas.width = canvas.parentElement.offsetWidth;
+        canvas.height = canvas.parentElement.offsetHeight;
+    }
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+
+    // Лепестки
+    class Petal {
+        constructor() { this.reset(); }
+        reset() {
+            this.x = Math.random() * canvas.width;
+            this.y = -20 - Math.random() * 100;
+            this.size = 6 + Math.random() * 12;
+            this.speedY = 0.5 + Math.random() * 1.5;
+            this.speedX = -0.5 + Math.random() * 1;
+            this.rotation = Math.random() * Math.PI * 2;
+            this.rotSpeed = -0.02 + Math.random() * 0.04;
+            this.opacity = 0.15 + Math.random() * 0.35;
+            this.wobbleAmp = 0.5 + Math.random() * 1.5;
+            this.wobbleSpeed = 0.02 + Math.random() * 0.03;
+            this.wobblePhase = Math.random() * Math.PI * 2;
+            // Цвет: оттенки розового, кораллового, кремового
+            const colors = ['#e8665a', '#d4728c', '#f0a8a0', '#f5d5c8', '#d4a855', '#c9877a'];
+            this.color = colors[Math.floor(Math.random() * colors.length)];
+        }
+        update() {
+            this.y += this.speedY;
+            this.wobblePhase += this.wobbleSpeed;
+            this.x += this.speedX + Math.sin(this.wobblePhase) * this.wobbleAmp;
+            this.rotation += this.rotSpeed;
+            if (this.y > canvas.height + 20) this.reset();
+        }
+        draw() {
+            ctx.save();
+            ctx.translate(this.x, this.y);
+            ctx.rotate(this.rotation);
+            ctx.globalAlpha = this.opacity;
+            ctx.fillStyle = this.color;
+            // Рисуем лепесток формой эллипса
+            ctx.beginPath();
+            ctx.ellipse(0, 0, this.size * 0.5, this.size, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+        }
+    }
+
+    const petals = [];
+    const petalCount = 45;
+    for (let i = 0; i < petalCount; i++) {
+        const p = new Petal();
+        p.y = Math.random() * canvas.height; // Разброс по вертикали при инициализации
+        petals.push(p);
+    }
+
+    function animatePetals() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        petals.forEach(p => {
+            p.update();
+            p.draw();
+        });
+        requestAnimationFrame(animatePetals);
+    }
+    animatePetals();
+
+    // === МЫШЬ: ПАРАЛЛАКС ГЕРОЯ ===
+    const heroContent = document.querySelector('.hero-content');
+    document.querySelector('.hero').addEventListener('mousemove', (e) => {
+        const rect = e.currentTarget.getBoundingClientRect();
+        const x = (e.clientX - rect.left) / rect.width - 0.5;
+        const y = (e.clientY - rect.top) / rect.height - 0.5;
+        heroContent.style.transform = `translate(${x * -15}px, ${y * -10}px)`;
+    });
+
+    // === ИНИЦИАЛИЗАЦИЯ ===
+    renderCatalog();
+    renderReviews();
+    </script>
+</body>
+</html>
